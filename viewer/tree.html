@@ -1,0 +1,1398 @@
+<!--
+input: 依赖 sources/cn-math-taxonomy/data/ (初中数学), data/ (Marble国际微知识点), data/union/ (全量联合图谱) 与 viewer/i18n-data.json
+output: 提供 100% 像素级对齐参考的高性能 2D 拓扑大纲、先修链递归树、DAG最长路径分层、掌握标准与核心诊断测评工作台，全面支持初中数学与 Marble 国际微知识点双向自由切换
+pos: 知识图谱查看器的第二核心展示层（2D DAG 拓扑诊断工作台），与 3D 倒棱锥星云完全互补并双向联动
+一旦我被更新，务必更新我的开头注释，以及所属的文件夹的md。
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知识图谱拓扑大纲 · 先修链与诊断测评工作台</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --line: #e1e4e8;
+    --text: #1f2933;
+    --muted: #6b7785;
+    --accent: #2563eb;
+    --hard: #c2410c;
+    --soft: #6b7785;
+    --ext: #7c3aed;
+    --ext-bg: #ede9fe;
+    --chip-bg: #ffffff;
+    --header-bg: #1e293b;
+    --header-text: #ffffff;
+    --header-note: #cbd5e1;
+    --grp-bg: #f1f5f9;
+    --grp-text: #475569;
+    --item-hover: #f8fafc;
+    --item-sel: #e8f0fe;
+    --item-border: #f0f2f4;
+    --q-bg: #f8fafc;
+    --tag-bg: #eef2f7;
+    --tag-text: #334155;
+  }
+
+  /* 深色主题模式 (Dark Mode) */
+  body.theme-dark {
+    --bg: #090b10;
+    --panel: #121722;
+    --line: rgba(255, 255, 255, 0.08);
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --hard: #ea580c;
+    --soft: #64748b;
+    --ext: #c084fc;
+    --ext-bg: rgba(168, 85, 247, 0.15);
+    --chip-bg: #1a2234;
+    --header-bg: #0f1420;
+    --header-text: #ffffff;
+    --header-note: #94a3b8;
+    --grp-bg: #171d2b;
+    --grp-text: #94a3b8;
+    --item-hover: #161c2a;
+    --item-sel: rgba(56, 189, 248, 0.12);
+    --item-border: rgba(255, 255, 255, 0.04);
+    --q-bg: #151a27;
+    --tag-bg: #1e2638;
+    --tag-text: #cbd5e1;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  header {
+    padding: 8px 16px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  header .note {
+    font-size: 12px;
+    color: var(--header-note);
+  }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .header-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .header-select-wrap label {
+    font-size: 12px;
+    color: var(--header-note);
+  }
+
+  .header-select {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.15s ease;
+  }
+
+  .header-select:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .header-select option {
+    background: #1e293b;
+    color: #fff;
+  }
+  body.theme-dark .header-select option {
+    background: #0f1420;
+    color: #fff;
+  }
+
+  header .tool-link {
+    font-size: 12px;
+    color: #fff;
+    background: var(--accent);
+    padding: 3px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  header .tool-link:hover {
+    opacity: 0.9;
+  }
+
+  .theme-toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .theme-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  #app {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
+  #side {
+    width: 340px;
+    min-width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  #filters {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 6px;
+  }
+
+  #filters input, #filters select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font: inherit;
+    background: var(--panel);
+    color: var(--text);
+  }
+
+  #filters .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  #filters label.chk {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #filters label.chk input {
+    width: auto;
+    cursor: pointer;
+  }
+
+  #count {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  #list {
+    overflow: auto;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #list .grp {
+    position: sticky;
+    top: 0;
+    background: var(--grp-bg);
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--grp-text);
+    border-bottom: 1px solid var(--line);
+    z-index: 2;
+  }
+
+  #list li.item {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--item-border);
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+
+  #list li.item:hover {
+    background: var(--item-hover);
+  }
+
+  #list li.item.sel {
+    background: var(--item-sel);
+    border-left: 3px solid var(--accent);
+    padding-left: 9px;
+  }
+
+  #list .nm {
+    display: block;
+    font-weight: 500;
+  }
+
+  #list .nm-sub {
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 1px;
+  }
+
+  #list .meta {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  #main {
+    flex: 1;
+    overflow: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .card h1.title {
+    font-size: 20px;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+
+  .card .sub-title {
+    font-size: 14px;
+    color: var(--accent);
+    margin: 0 0 8px;
+    font-weight: 500;
+  }
+
+  .card h2 {
+    font-size: 14px;
+    margin: 0 0 10px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .card h3 {
+    font-size: 13px;
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 8px 0 12px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 2px 7px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .tag.ext {
+    background: var(--ext-bg);
+    color: var(--ext);
+    font-weight: 500;
+  }
+
+  .tag.std {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--accent);
+    border: 1px dashed rgba(37, 99, 235, 0.3);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+  }
+
+  .tag.subj {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    font-weight: 500;
+  }
+  body.theme-dark .tag.subj {
+    color: #34d399;
+  }
+
+  ul.plain {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  ul.plain li {
+    margin: 4px 0;
+  }
+
+  .q {
+    background: var(--q-bg);
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .q .q-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  details.ans {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  details.ans summary {
+    cursor: pointer;
+    color: var(--accent);
+    user-select: none;
+    font-weight: 500;
+  }
+
+  details.ans div {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: var(--panel);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar button {
+    font: inherit;
+    font-size: 12px;
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .toolbar button.on {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  ul.tree, ul.tree ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 20px;
+    position: relative;
+  }
+
+  ul.tree li {
+    position: relative;
+    padding: 4px 0 4px 14px;
+  }
+
+  ul.tree li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 13px;
+    width: 10px;
+    height: 1px;
+    background: var(--line);
+  }
+
+  ul.tree li::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+
+  ul.tree > li:last-child::after {
+    height: 14px;
+    bottom: auto;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .badge.hard {
+    background: #ffedd5;
+    color: var(--hard);
+  }
+  body.theme-dark .badge.hard {
+    background: rgba(234, 88, 12, 0.2);
+    color: #fb923c;
+  }
+
+  .badge.soft {
+    background: #f1f5f9;
+    color: var(--soft);
+  }
+  body.theme-dark .badge.soft {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+  }
+
+  a.node {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  a.node:hover {
+    text-decoration: underline;
+  }
+
+  .seen {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .why {
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  .layer {
+    margin: 8px 0;
+  }
+
+  .layer h3 {
+    font-size: 12px;
+    margin: 0 0 4px;
+    color: var(--muted);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: var(--chip-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .chip.ext {
+    border-color: var(--ext);
+  }
+
+  #err {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 14px 18px;
+    max-width: 760px;
+  }
+
+  #err code {
+    background: #fee2e2;
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+
+  .empty {
+    color: var(--muted);
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  @media (max-width: 760px) {
+    #app { flex-direction: column; }
+    #side { width: 100%; height: 42%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-brand">
+    <h1 id="pageTitle">知识图谱拓扑大纲</h1>
+    <span class="note" id="pageNote">· 先修链递归树与诊断测评工作台</span>
+  </div>
+  <div class="header-actions">
+    <div class="header-select-wrap">
+      <label for="datasetSelector">图谱数据集:</label>
+      <select id="datasetSelector" class="header-select" title="切换图谱数据集">
+        <option value="cn-math">📐 中国初中数学 (333 节点)</option>
+        <option value="marble">🌌 Marble 国际图谱 (1590 节点)</option>
+        <option value="union">🌐 全量联合图谱 (1923 节点)</option>
+      </select>
+    </div>
+    <button id="themeToggleBtn" class="theme-toggle-btn" title="切换浅色 / 深色主题">☀️ 浅色</button>
+    <a class="tool-link" id="btnGoTo3D" href="index.html" title="进入 3D 倒棱锥知识星云漫游视图">🌌 3D 知识星云 →</a>
+  </div>
+</header>
+<div id="app">
+  <aside id="side">
+    <div id="filters">
+      <input id="q" type="search" placeholder="搜索知识点名称、描述、细分领域、ID…" autocomplete="off">
+      <div class="row">
+        <select id="fDomain"><option value="">全部学科 / 领域</option></select>
+        <select id="fGrade"><option value="">全部学段 / 年级</option></select>
+      </div>
+      <div class="row">
+        <select id="fType"><option value="">全部认知类型</option></select>
+        <label class="chk" id="lblExt"><input type="checkbox" id="fExt"> 含外部先修</label>
+      </div>
+      <div id="count"></div>
+    </div>
+    <ul id="list"></ul>
+  </aside>
+  <main id="main"><div class="empty">正在加载知识图谱拓扑数据…</div></main>
+</div>
+
+<script>
+"use strict";
+
+const TYPE_ZH = {
+  conceptual: "概念理解",
+  procedural: "程序性技能",
+  reasoning: "推理证明",
+  application: "应用实践",
+  modeling: "建模探究"
+};
+
+const GRADE_ZH = { 7: "七", 8: "八", 9: "九" };
+
+const DATASETS = {
+  "cn-math": {
+    name: "中国初中数学",
+    fullName: "中国初中数学知识图谱（七—九年级）",
+    note: "· 2D 拓扑大纲与先修链诊断测评工作台（333 节点 · 629 依赖）",
+    topicsCandidates: [
+      "../sources/cn-math-taxonomy/data/topics.json",
+      "/sources/cn-math-taxonomy/data/topics.json",
+      "sources/cn-math-taxonomy/data/topics.json"
+    ],
+    depsCandidates: [
+      "../sources/cn-math-taxonomy/data/dependencies.json",
+      "/sources/cn-math-taxonomy/data/dependencies.json",
+      "sources/cn-math-taxonomy/data/dependencies.json"
+    ],
+    defaultId: "cnm_001"
+  },
+  "marble": {
+    name: "Marble 国际微知识点",
+    fullName: "Marble 国际微知识点图谱（K-6 全学科）",
+    note: "· 官方微知识点与先修拓扑诊断大纲（1590 节点 · 3221 依赖）",
+    topicsCandidates: [
+      "../data/topics.json",
+      "/data/topics.json",
+      "data/topics.json"
+    ],
+    depsCandidates: [
+      "../data/dependencies.json",
+      "/data/dependencies.json",
+      "data/dependencies.json"
+    ],
+    defaultId: "mt_AzTrT5ySCx"
+  },
+  "union": {
+    name: "全量联合图谱",
+    fullName: "联合微知识点拓扑图谱（初中数学 + Marble 国际）",
+    note: "· 跨课程体系联合索引大纲（1923 节点 · 3837 依赖）",
+    topicsCandidates: [
+      "../data/union/topics.json",
+      "/data/union/topics.json",
+      "data/union/topics.json"
+    ],
+    depsCandidates: [
+      "../data/union/dependencies.json",
+      "/data/union/dependencies.json",
+      "data/union/dependencies.json"
+    ],
+    defaultId: "marble:mt_AzTrT5ySCx"
+  }
+};
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v;
+    else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) {
+    if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
+  }
+  return e;
+};
+
+let currentDatasetKey = "cn-math";
+let i18n = null;
+let topics = [], deps = [], byId = new Map(), pre = new Map(), post = new Map(), selected = null;
+let viewMode = "tree";
+
+// 加载国际化对照字典
+async function loadI18n() {
+  try {
+    const res = await fetch("i18n-data.json");
+    if (res.ok) i18n = await res.json();
+  } catch (e) {
+    console.warn("未加载到 i18n-data.json，将使用内置基础对照。");
+  }
+}
+
+// 统一数据归一化
+function normalizeTopics(rawTopics, dsKey) {
+  const rawList = Array.isArray(rawTopics) ? rawTopics : (rawTopics.topics || []);
+  return rawList.map(t => {
+    const id = t.id;
+    const isCnMath = id.startsWith("cnm_") || (t.sourceId && t.sourceId.includes("cn-math"));
+    const isMarble = id.startsWith("mt_") || (t.sourceId && t.sourceId.includes("marble"));
+
+    const name = t.name || id;
+    const subject = t.subject || (isCnMath ? "数学" : "综合");
+    const domain = t.domain || "";
+    const typeRaw = (t.type || "conceptual").toLowerCase();
+    const type = TYPE_ZH[typeRaw] ? typeRaw : "conceptual";
+
+    // 中文本地化翻译对照
+    let zhTitle = "";
+    if (i18n && i18n.nodes && i18n.nodes[name]) {
+      zhTitle = i18n.nodes[name].zhTitle || "";
+    }
+    const zhDomain = (i18n && i18n.domainMap && i18n.domainMap[domain]) || domain;
+    const zhSubject = (i18n && i18n.subjectMap && i18n.subjectMap[subject]) || subject;
+
+    // 掌握标准 (Evidence of Mastery)
+    let criteria = [];
+    if (Array.isArray(t.mastery_criteria) && t.mastery_criteria.length) {
+      criteria = t.mastery_criteria;
+    } else if (Array.isArray(t.evidence) && t.evidence.length) {
+      criteria = t.evidence;
+    }
+
+    // 核心诊断题与测评评估提示 (Diagnostic Question / Assessment Prompt)
+    let diag = null;
+    if (t.diagnostic_question && (t.diagnostic_question.question || t.diagnostic_question.answer)) {
+      diag = {
+        question: t.diagnostic_question.question || "",
+        answer: t.diagnostic_question.answer || ""
+      };
+    } else if (t.assessmentPrompt) {
+      const cleanPrompt = t.assessmentPrompt.replace(/\{\{name\}\}/g, "孩子/学习者");
+      diag = {
+        question: cleanPrompt,
+        answer: criteria.length ? "诊断与评估指标：\n• " + criteria.join("\n• ") : "依据当前微知识点的核心掌握标准进行情境诊断验证。"
+      };
+    }
+
+    // 权威课程标准映射 (Standards)
+    const standards = Array.isArray(t.standards) ? t.standards : [];
+
+    // 年级 / 适龄阶段显示
+    let ageLabel = "";
+    let group = "";
+    if (t.external) {
+      group = "小学先修（外部基础）";
+      ageLabel = "小学";
+    } else if (t.grade != null && t.semester) {
+      const g = GRADE_ZH[t.grade] || t.grade;
+      group = `${g}年级${t.semester}册`;
+      ageLabel = `${g}年级${t.semester}`;
+    } else if (t.grade != null) {
+      const g = GRADE_ZH[t.grade] || t.grade;
+      group = `${g}年级`;
+      ageLabel = `${g}年级`;
+    } else if (t.ageRangeStart != null && t.ageRangeEnd != null) {
+      group = `${zhSubject} · 适龄 ${t.ageRangeStart}-${t.ageRangeEnd} 岁`;
+      ageLabel = `适龄 ${t.ageRangeStart}-${t.ageRangeEnd} 岁`;
+    } else {
+      group = zhSubject || "通用知识模块";
+      ageLabel = zhSubject || "通用";
+    }
+
+    return {
+      ...t,
+      id,
+      name,
+      zhTitle,
+      subject,
+      zhSubject,
+      domain,
+      zhDomain,
+      chapter: t.chapter || "",
+      type,
+      description: t.description || "",
+      mastery_criteria: criteria,
+      diagnostic_question: diag,
+      standards,
+      group,
+      ageLabel,
+      external: Boolean(t.external),
+      isCnMath,
+      isMarble
+    };
+  });
+}
+
+function normalizeDeps(rawDeps) {
+  const rawList = Array.isArray(rawDeps) ? rawDeps : (rawDeps.dependencies || []);
+  return rawList.map(d => ({
+    topicId: d.topicId,
+    prerequisiteId: d.prerequisiteId,
+    strength: d.strength || "hard",
+    reason: d.reason || (d.strength === "hard" ? "核心先决条件" : "辅助支撑基础")
+  }));
+}
+
+// 切换并加载指定数据集
+async function switchDataset(dsKey, targetNodeId) {
+  const ds = DATASETS[dsKey] || DATASETS["cn-math"];
+  currentDatasetKey = dsKey;
+
+  // 同步 URL 参数
+  try {
+    const url = new URL(window.location);
+    url.searchParams.set("dataset", dsKey);
+    window.history.replaceState(null, "", url);
+  } catch (e) {}
+
+  // 同步 Header 下拉框
+  const sel = $("#datasetSelector");
+  if (sel && sel.value !== dsKey) sel.value = dsKey;
+
+  // 更新 Header 标题与说明
+  $("#pageTitle").textContent = ds.fullName;
+  $("#pageNote").textContent = ds.note;
+
+  // 尝试加载数据文件
+  let loaded = false;
+  let rawTopics = null, rawDeps = null;
+
+  for (let i = 0; i < ds.topicsCandidates.length; i++) {
+    try {
+      const [tRes, dRes] = await Promise.all([
+        fetch(ds.topicsCandidates[i]),
+        fetch(ds.depsCandidates[i])
+      ]);
+      if (tRes.ok && dRes.ok) {
+        rawTopics = await tRes.json();
+        rawDeps = await dRes.json();
+        loaded = true;
+        break;
+      }
+    } catch (e) {}
+  }
+
+  if (!loaded) {
+    $("#main").replaceChildren(el("div", { id: "err" },
+      el("b", { text: `无法加载数据集 [${ds.name}]。` }), el("br"),
+      `未能成功请求到 [${ds.topicsCandidates[0]}]，请确认本地 HTTP 服务正常运行。`));
+    $("#count").textContent = "";
+    return;
+  }
+
+  topics = normalizeTopics(rawTopics, dsKey);
+  deps = normalizeDeps(rawDeps);
+
+  // 构筑图索引
+  byId = new Map();
+  pre = new Map();
+  post = new Map();
+
+  for (const t of topics) {
+    byId.set(t.id, t);
+    pre.set(t.id, []);
+    post.set(t.id, []);
+  }
+
+  for (const d of deps) {
+    if (pre.has(d.topicId)) pre.get(d.topicId).push({ id: d.prerequisiteId, strength: d.strength, reason: d.reason });
+    if (post.has(d.prerequisiteId)) post.get(d.prerequisiteId).push({ id: d.topicId, strength: d.strength, reason: d.reason });
+  }
+
+  for (const m of [pre, post]) {
+    for (const arr of m.values()) {
+      arr.sort((x, y) => (x.strength === y.strength ? 0 : x.strength === "hard" ? -1 : 1) || x.id.localeCompare(y.id));
+    }
+  }
+
+  // 动态重建过滤器选项
+  rebuildFilters(dsKey);
+
+  // 渲染列表
+  renderList();
+
+  // 确定选中的节点
+  let selId = targetNodeId || location.hash.slice(1);
+  if (!byId.has(selId)) {
+    selId = ds.defaultId;
+    if (!byId.has(selId) && topics.length > 0) {
+      const first = topics.find(t => !t.external) || topics[0];
+      selId = first.id;
+    }
+  }
+
+  if (byId.has(selId)) {
+    select(selId, true);
+  }
+}
+
+// 动态构建过滤器下拉框
+function rebuildFilters(dsKey) {
+  // 1. 学科 / 领域下拉框 (fDomain)
+  const selDom = $("#fDomain");
+  selDom.replaceChildren(el("option", { value: "", text: "全部学科 / 细分领域" }));
+
+  if (dsKey === "cn-math") {
+    const domains = [...new Set(topics.map(t => t.domain))].filter(Boolean);
+    for (const d of domains) selDom.append(el("option", { value: d, text: d }));
+  } else {
+    // Marble 或 Union：按学科聚合
+    const subjMap = new Map();
+    for (const t of topics) {
+      const s = t.zhSubject || t.subject;
+      if (!subjMap.has(s)) subjMap.set(s, new Set());
+      if (t.domain) subjMap.get(s).add(t.zhDomain || t.domain);
+    }
+
+    for (const [s, domSet] of subjMap) {
+      const grp = el("optgroup", { label: s });
+      // 支持按一级学科直接筛选
+      grp.append(el("option", { value: "SUBJ:" + s, text: `【${s}】全部微知识点` }));
+      for (const d of domSet) {
+        grp.append(el("option", { value: d, text: d }));
+      }
+      selDom.append(grp);
+    }
+  }
+
+  // 2. 年级 / 适龄阶段 (fGrade)
+  const selGrade = $("#fGrade");
+  selGrade.replaceChildren(el("option", { value: "", text: dsKey === "cn-math" ? "全部年级" : "全部学段 / 适龄" }));
+
+  if (dsKey === "cn-math") {
+    const opts = [
+      { v: "7上", t: "七年级上" }, { v: "7下", t: "七年级下" },
+      { v: "8上", t: "八年级上" }, { v: "8下", t: "八年级下" },
+      { v: "9上", t: "九年级上" }, { v: "9下", t: "九年级下" },
+      { v: "7", t: "七年级（全）" }, { v: "8", t: "八年级（全）" }, { v: "9", t: "九年级（全）" }
+    ];
+    for (const o of opts) selGrade.append(el("option", { value: o.v, text: o.t }));
+  } else {
+    // Marble 适龄段
+    const ageRanges = [
+      { v: "5-7", t: "适龄 5-7 岁 (K-1 启蒙)" },
+      { v: "7-9", t: "适龄 7-9 岁 (Grades 2-3 中小)" },
+      { v: "9-11", t: "适龄 9-11 岁 (Grades 4-5 高阶)" },
+      { v: "11-14", t: "适龄 11-14 岁 (初中衔接)" }
+    ];
+    for (const a of ageRanges) selGrade.append(el("option", { value: a.v, text: a.t }));
+  }
+
+  // 3. 认知类型 (fType)
+  const selType = $("#fType");
+  selType.replaceChildren(el("option", { value: "", text: "全部认知类型" }));
+  for (const [k, v] of Object.entries(TYPE_ZH)) {
+    selType.append(el("option", { value: k, text: v }));
+  }
+
+  // 4. 外部先修开关
+  const hasExt = topics.some(t => t.external);
+  const lblExt = $("#lblExt");
+  if (lblExt) {
+    lblExt.style.display = hasExt ? "flex" : "none";
+    if (dsKey === "cn-math") lblExt.innerHTML = '<input type="checkbox" id="fExt"> 含小学先修';
+    else lblExt.innerHTML = '<input type="checkbox" id="fExt"> 含外部依赖';
+  }
+}
+
+function filtered() {
+  const q = $("#q").value.trim().toLowerCase();
+  const d = $("#fDomain").value;
+  const g = $("#fGrade").value;
+  const ty = $("#fType").value;
+  const extInput = $("#fExt");
+  const ext = extInput ? extInput.checked : true;
+
+  return topics.filter(t => {
+    if (t.external && !ext) return false;
+
+    // 领域 / 学科匹配
+    if (d) {
+      if (d.startsWith("SUBJ:")) {
+        const targetSubj = d.slice(5);
+        if (t.zhSubject !== targetSubj && t.subject !== targetSubj) return false;
+      } else {
+        if (t.domain !== d && t.zhDomain !== d) return false;
+      }
+    }
+
+    // 认知类型
+    if (ty && t.type !== ty) return false;
+
+    // 年级 / 适龄段
+    if (g) {
+      if (currentDatasetKey === "cn-math") {
+        if (t.external) return false;
+        if (g.length === 1 ? String(t.grade) !== g : (t.grade + t.semester) !== g) return false;
+      } else {
+        if (g === "5-7" && !(t.ageRangeStart >= 5 && t.ageRangeEnd <= 7)) return false;
+        if (g === "7-9" && !(t.ageRangeStart >= 7 && t.ageRangeEnd <= 9)) return false;
+        if (g === "9-11" && !(t.ageRangeStart >= 9 && t.ageRangeEnd <= 11)) return false;
+        if (g === "11-14" && !(t.ageRangeStart >= 11 || t.ageRangeEnd >= 12)) return false;
+      }
+    }
+
+    // 文本模糊搜索 (名称、中文标题、描述、ID、章节、领域)
+    if (q) {
+      const haystack = (t.name + " " + (t.zhTitle || "") + " " + t.description + " " + (t.chapter || "") + " " + (t.zhDomain || "") + " " + (t.zhSubject || "") + " " + t.id).toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+
+    return true;
+  });
+}
+
+function renderList() {
+  const items = filtered(), ul = $("#list");
+  ul.replaceChildren();
+  let lastGroup = null;
+
+  for (const t of items) {
+    const key = t.group;
+    if (key !== lastGroup) {
+      lastGroup = key;
+      ul.append(el("li", { class: "grp", text: key }));
+    }
+
+    const titleEl = el("span", { class: "nm", text: t.name });
+    const kids = [titleEl];
+
+    // 若有中文翻译且不同于英文，显示小字中文对照
+    if (t.zhTitle && t.zhTitle !== t.name) {
+      kids.push(el("span", { class: "nm-sub", text: t.zhTitle }));
+    }
+
+    const metaText = t.external
+      ? (t.zhDomain || t.domain)
+      : (t.chapter ? (t.zhDomain || t.domain) + " · " + t.chapter.replace(/^.. /, "") : (t.zhDomain || t.domain) + " · " + t.ageLabel);
+
+    kids.push(el("span", { class: "meta", text: metaText }));
+
+    const li = el("li", {
+      class: "item" + (t.id === selected ? " sel" : ""),
+      "data-id": t.id,
+      onclick: () => select(t.id, true)
+    }, ...kids);
+
+    ul.append(li);
+  }
+
+  $("#count").textContent = `显示 ${items.length} / ${topics.length} 个知识点`;
+}
+
+function select(id, push) {
+  if (!byId.has(id)) return;
+  selected = id;
+
+  if (push && location.hash.slice(1) !== id) {
+    history.replaceState(null, "", "#" + id);
+  }
+
+  // 同步 3D 星云跳转链接
+  const btn3D = $("#btnGoTo3D");
+  if (btn3D) {
+    btn3D.href = `index.html?dataset=${currentDatasetKey}#${id}`;
+  }
+
+  for (const li of document.querySelectorAll("#list li.item")) {
+    li.classList.toggle("sel", li.dataset.id === id);
+  }
+  const cur = document.querySelector("#list li.sel");
+  if (cur) cur.scrollIntoView({ block: "nearest" });
+
+  renderDetail(byId.get(id));
+  $("#main").scrollTop = 0;
+}
+
+const link = id => {
+  const n = byId.get(id);
+  const title = n ? (n.zhTitle && n.zhTitle !== n.name ? `${n.name} (${n.zhTitle})` : n.name) : id;
+  return el("a", { class: "node", onclick: () => select(id, true), text: title });
+};
+
+const badge = s => el("span", { class: "badge " + s, text: s === "hard" ? "硬先修" : "软先修" });
+
+function renderDetail(t) {
+  const m = $("#main");
+
+  // 1. 顶部基础卡片 (Title + Tags + Description)
+  const tagsList = [
+    el("span", { class: "tag" + (t.external ? " ext" : ""), text: t.id }),
+    el("span", { class: "tag subj", text: t.zhSubject || t.subject }),
+    el("span", { class: "tag", text: t.zhDomain || t.domain }),
+    el("span", { class: "tag", text: TYPE_ZH[t.type] || t.type }),
+    el("span", { class: "tag", text: t.ageLabel })
+  ];
+
+  if (t.chapter) {
+    tagsList.push(el("span", { class: "tag", text: t.chapter }));
+  }
+
+  // 课标映射徽章
+  if (t.standards && t.standards.length) {
+    for (const std of t.standards) {
+      const code = typeof std === "string" ? std : (std.id || std.code || JSON.stringify(std));
+      const title = typeof std === "object" && std.confidence
+        ? `对齐课程标准: ${code} (匹配度: ${std.confidence})`
+        : `对齐课程标准: ${code}`;
+      tagsList.push(el("span", { class: "tag std", title: title, text: code }));
+    }
+  }
+
+  const headKids = [
+    el("h1", { class: "title", text: t.name })
+  ];
+
+  if (t.zhTitle && t.zhTitle !== t.name) {
+    headKids.push(el("div", { class: "sub-title", text: "中文对应：" + t.zhTitle }));
+  }
+
+  headKids.push(el("div", { class: "tags" }, ...tagsList), el("p", { text: t.description }));
+
+  const parts = [el("div", { class: "card" }, ...headKids)];
+
+  // 2. 掌握标准 (Evidence of Mastery)
+  if (t.mastery_criteria && t.mastery_criteria.length) {
+    parts.push(el("div", { class: "card" },
+      el("h2", { text: "微知识点掌握标准 (Evidence of Mastery)" }),
+      el("ul", { class: "plain" }, t.mastery_criteria.map(c => el("li", { text: c })))));
+  }
+
+  // 3. 核心诊断题与测评提示 (Assessment Prompt / Diagnostic Question)
+  if (t.diagnostic_question && t.diagnostic_question.question) {
+    const qKids = [
+      el("div", { class: "q-label", text: "核心诊断题 · 学习者测评" }),
+      el("div", { text: t.diagnostic_question.question })
+    ];
+
+    if (t.diagnostic_question.answer) {
+      qKids.push(
+        el("details", { class: "ans" },
+          el("summary", { text: "查看答案与评估诊断要点" }),
+          el("div", { style: "white-space: pre-wrap;", text: t.diagnostic_question.answer })));
+    }
+
+    parts.push(el("div", { class: "card" }, el("h2", { text: "测评诊断" }), el("div", { class: "q" }, ...qKids)));
+  }
+
+  // 4. 先修链卡片与后续解锁卡片
+  parts.push(prereqCard(t), postCard(t));
+  m.replaceChildren(...parts);
+}
+
+function prereqCard(t) {
+  const card = el("div", { class: "card" }), body = el("div");
+  const direct = pre.get(t.id) || [];
+  const all = ancestors(t.id);
+
+  card.append(el("h2", { text: "先修链（向上递归 DAG）" }));
+  if (!direct.length) {
+    card.append(el("div", { class: "muted", text: t.external ? "外部基础节点，没有进一步先修。" : "基础起点概念，无需先修知识。" }));
+    return card;
+  }
+
+  const bar = el("div", { class: "toolbar" },
+    el("button", { class: viewMode === "tree" ? "on" : "", text: "树状结构", onclick: () => { viewMode = "tree"; renderDetail(t); } }),
+    el("button", { class: viewMode === "layer" ? "on" : "", text: "最长路径分层", onclick: () => { viewMode = "layer"; renderDetail(t); } }),
+    el("span", { class: "muted", text: `直接先修 ${direct.length} 个，累计上游 ${all.size} 个微知识点。树状图中同一知识点只在首次出现处展开。` }));
+
+  card.append(bar, body);
+  if (viewMode === "tree") body.append(tree(t.id));
+  else body.append(layers(t.id));
+  return card;
+}
+
+function ancestors(id) {
+  const seen = new Set(), st = [id];
+  while (st.length) {
+    const cur = st.pop();
+    for (const p of (pre.get(cur) || [])) {
+      if (!seen.has(p.id)) { seen.add(p.id); st.push(p.id); }
+    }
+  }
+  return seen;
+}
+
+function tree(rootId) {
+  const expanded = new Set([rootId]);
+  const build = id => {
+    const ul = el("ul", { class: "tree" });
+    for (const p of (pre.get(id) || [])) {
+      const n = byId.get(p.id);
+      if (!n) continue;
+      const li = el("li");
+      li.append(
+        badge(p.strength),
+        link(p.id),
+        el("span", { class: "seen", text: " " + (n.external ? "小学" : n.ageLabel) }),
+        el("span", { class: "why", text: "— " + p.reason }));
+
+      if ((pre.get(p.id) || []).length) {
+        if (expanded.has(p.id)) {
+          li.append(el("span", { class: "seen", text: " （↑ 已在上方展开）" }));
+        } else {
+          expanded.add(p.id);
+          li.append(build(p.id));
+        }
+      }
+      ul.append(li);
+    }
+    return ul;
+  };
+  return build(rootId);
+}
+
+function layers(rootId) {
+  const level = new Map();
+  const walk = (id, d) => {
+    for (const p of (pre.get(id) || [])) {
+      if ((level.get(p.id) || 0) < d) {
+        level.set(p.id, d);
+        walk(p.id, d + 1);
+      }
+    }
+  };
+  walk(rootId, 1);
+  const direct = new Map((pre.get(rootId) || []).map(p => [p.id, p.strength]));
+  const max = level.size ? Math.max(...level.values()) : 0;
+  const box = el("div");
+
+  for (let d = 1; d <= max; d++) {
+    const ids = [...level].filter(([, v]) => v === d).map(([k]) => k)
+      .sort((a, b) => (byId.get(a).external - byId.get(b).external) || a.localeCompare(b));
+
+    box.append(el("div", { class: "layer" },
+      el("h3", { text: d === 1 ? "第 1 层：直接先修基石" : `第 ${d} 层：先修的先修（深度 ${d}）` }),
+      el("div", { class: "chips" }, ids.map(id => {
+        const n = byId.get(id);
+        const nameDisp = n ? (n.zhTitle && n.zhTitle !== n.name ? `${n.name} (${n.zhTitle})` : n.name) : id;
+        return el("span", { class: "chip" + (n && n.external ? " ext" : ""), onclick: () => select(id, true) },
+          direct.has(id) ? badge(direct.get(id)) : null,
+          nameDisp,
+          el("span", { class: "seen", text: " " + (n ? (n.external ? "小学" : n.ageLabel) : "") }));
+      }))));
+  }
+  box.append(el("div", { class: "muted", style: "margin-top: 8px;", text: "层数 = 到当前知识点的最长先修路径长度；越深越基础。" }));
+  return box;
+}
+
+function postCard(t) {
+  const card = el("div", { class: "card" }), list = post.get(t.id) || [];
+  const down = new Set(), st = [t.id];
+  while (st.length) {
+    const cur = st.pop();
+    for (const p of (post.get(cur) || [])) {
+      if (!down.has(p.id)) { down.add(p.id); st.push(p.id); }
+    }
+  }
+
+  card.append(el("h2", { text: `后续解锁概念（直接 ${list.length} 个，累计下游 ${down.size} 个）` }));
+  if (!list.length) {
+    card.append(el("div", { class: "muted", text: "没有后续微知识点直接依赖它（末端应用节点）。" }));
+    return card;
+  }
+
+  card.append(el("ul", { class: "plain" }, list.map(p => {
+    const n = byId.get(p.id);
+    return el("li", {},
+      badge(p.strength),
+      link(p.id),
+      el("span", { class: "seen", text: " " + (n ? (n.external ? "小学" : n.ageLabel) : "") }),
+      el("span", { class: "why muted", text: " — " + p.reason }));
+  })));
+
+  return card;
+}
+
+// 主题切换控制器
+const themeBtn = $("#themeToggleBtn");
+function applyTheme(theme) {
+  const isDark = theme === "dark";
+  document.body.classList.toggle("theme-dark", isDark);
+  if (themeBtn) {
+    themeBtn.textContent = isDark ? "🌙 深色" : "☀️ 浅色";
+    themeBtn.title = isDark ? "切换为浅色主题 (对齐参考)" : "切换为深色主题";
+  }
+  localStorage.setItem("hub_theme", theme);
+}
+
+const savedTheme = localStorage.getItem("hub_theme") || "light";
+applyTheme(savedTheme);
+
+if (themeBtn) {
+  themeBtn.addEventListener("click", () => {
+    const currentTheme = document.body.classList.contains("theme-dark") ? "dark" : "light";
+    applyTheme(currentTheme === "dark" ? "light" : "dark");
+  });
+}
+
+// 数据集切换监听
+$("#datasetSelector").addEventListener("change", e => {
+  switchDataset(e.target.value);
+});
+
+// 过滤器交互监听
+for (const id of ["q", "fDomain", "fGrade", "fType"]) {
+  $("#" + id).addEventListener("input", renderList);
+}
+// 委托复选框监听
+$("#filters").addEventListener("change", e => {
+  if (e.target && e.target.id === "fExt") renderList();
+});
+
+// URL Hash 监听
+window.addEventListener("hashchange", () => {
+  const hash = location.hash.slice(1);
+  if (hash) {
+    if (byId.has(hash)) {
+      select(hash, false);
+    } else {
+      // 若当前图谱中未找到节点，检查是否来自其他数据集
+      if (hash.startsWith("mt_") && currentDatasetKey !== "marble") {
+        switchDataset("marble", hash);
+      } else if (hash.startsWith("cnm_") && currentDatasetKey !== "cn-math") {
+        switchDataset("cn-math", hash);
+      } else if ((hash.startsWith("marble:") || hash.startsWith("cn-math:")) && currentDatasetKey !== "union") {
+        switchDataset("union", hash);
+      }
+    }
+  }
+});
+
+// 页面初始化入口
+async function init() {
+  await loadI18n();
+
+  // 根据 URL query 参数与 hash 智能判断默认数据集
+  const params = new URLSearchParams(window.location.search);
+  const dsParam = params.get("dataset");
+  const hash = location.hash.slice(1);
+
+  let initialDataset = "cn-math";
+  if (dsParam && DATASETS[dsParam]) {
+    initialDataset = dsParam;
+  } else if (hash) {
+    if (hash.startsWith("mt_")) initialDataset = "marble";
+    else if (hash.startsWith("marble:") || hash.startsWith("cn-math:")) initialDataset = "union";
+    else if (hash.startsWith("cnm_")) initialDataset = "cn-math";
+  }
+
+  await switchDataset(initialDataset, hash);
+}
+
+init();
+</script>
+</body>
+</html>

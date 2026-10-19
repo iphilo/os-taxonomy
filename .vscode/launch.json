@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "启动知识图谱 Web 服务 (F5 默认)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/serve.mjs",
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "校验全量图谱数据 (validate:all)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate-union.mjs",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "运行 3D 物理力导向退火仿真 (Physics Relax)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/relax-cn-math-physics.mjs",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "构建全量联合索引 (build:union)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/build-union-index.mjs",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

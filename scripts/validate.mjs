@@ -4,7 +4,9 @@
  *
  * Verifies structure, referential integrity (every edge endpoint and every
  * topic→standard reference resolves), the codes-only invariant, declared
- * counts, and the manifest SHA-256 checksums. Exits non-zero on any failure.
+ * counts, and the manifest SHA-256 checksums. JSON checksum input is
+ * canonicalized to LF so a Windows CRLF checkout verifies the upstream bytes.
+ * Exits non-zero on any failure.
  *
  *   node scripts/validate.mjs
  */
@@ -16,7 +18,10 @@ import { fileURLToPath } from 'node:url';
 
 const DATA = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'data');
 const load = (name) => JSON.parse(readFileSync(resolve(DATA, name), 'utf8'));
-const bytesOf = (name) => readFileSync(resolve(DATA, name));
+const bytesOf = (name) => Buffer.from(
+  readFileSync(resolve(DATA, name), 'utf8').replace(/\r\n/g, '\n'),
+  'utf8',
+);
 
 const errors = [];
 const check = (cond, msg) => {

@@ -1,3 +1,23 @@
+# Learning Taxonomy Hub
+
+This repository is a **federated union** of Marble Skill Taxonomy and a Chinese junior-high mathematics source. Marble remains the upstream taxonomy foundation; the Chinese source is retained separately with its own provenance and license. The union index gives applications one namespaced view without erasing either source's identity.
+
+## Added Chinese mathematics source
+
+- Proposed project name: `learning-taxonomy-hub`
+- Imported source: `xiaoyang111222/cn-math-taxonomy` at commit `e47d9d1330a319b55ce7755792f75c45b3849330`
+- Imported data: 333 topics, 616 prerequisite edges, 1,407 questions, and Chinese curriculum-standard mappings.
+- Source-preserving location: [`sources/cn-math-taxonomy/`](sources/cn-math-taxonomy/)
+- Federated navigation indices: [`data/union/`](data/union/)
+
+Run `npm run build:union` after changing either source, then `npm run validate:all`.
+
+### Licensing boundary
+
+Do not treat this repository as having one replacement license. Marble's database and authored text remain subject to its upstream ODbL / CC BY-SA terms. The imported Chinese source retains its CC BY-NC 4.0 license in [`sources/cn-math-taxonomy/LICENSE`](sources/cn-math-taxonomy/LICENSE). The union index records source IDs rather than relicensing or flattening either corpus.
+
+---
+
 # Marble Skill Taxonomy
 
 An open, structured taxonomy of **what children learn** across the primary/elementary years — decomposed into fine-grained "micro-topics", wired into a prerequisite graph, and aligned to national curriculum standards. Produced by [Marble](https://withmarble.com).

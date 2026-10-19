@@ -1,12 +1,15 @@
 {
-  "name": "marble-taxonomy",
+  "name": "learning-taxonomy-hub",
   "version": "1.0.0",
-  "description": "An open, graph-structured taxonomy of primary/elementary learning.",
+  "description": "A federated learning-taxonomy workspace with Marble and Chinese junior-high mathematics sources.",
   "private": true,
   "type": "module",
   "license": "(ODbL-1.0 AND CC-BY-SA-4.0)",
   "homepage": "https://withmarble.com",
   "scripts": {
-    "validate": "node scripts/validate.mjs"
+    "validate": "node scripts/validate.mjs",
+    "build:union": "node scripts/build-union-index.mjs",
+    "validate:union": "node scripts/validate-union.mjs",
+    "validate:all": "node scripts/validate.mjs && node scripts/validate-union.mjs"
   }
 }

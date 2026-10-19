@@ -1,0 +1,29 @@
+{
+  "version": "union-v0.1.0",
+  "aggregation": "federated-source-preserving",
+  "counts": {
+    "topics": 1923,
+    "dependencies": 3837
+  },
+  "sources": [
+    {
+      "id": "marble-v1",
+      "revision": "96a7933754af672e1bfdbf7ecb05c325860c6e0d",
+      "topics": 1590,
+      "dependencies": 3221,
+      "topicPath": "data/topics.json",
+      "dependencyPath": "data/dependencies.json",
+      "license": "ODbL-1.0 database; CC-BY-SA-4.0 Marble-authored text"
+    },
+    {
+      "id": "cn-math-taxonomy-2026-10-19",
+      "revision": "e47d9d1330a319b55ce7755792f75c45b3849330",
+      "topics": 333,
+      "dependencies": 616,
+      "questions": 1407,
+      "topicPath": "sources/cn-math-taxonomy/data/topics.json",
+      "dependencyPath": "sources/cn-math-taxonomy/data/dependencies.json",
+      "license": "CC-BY-NC-4.0; see sources/cn-math-taxonomy/LICENSE"
+    }
+  ]
+}
